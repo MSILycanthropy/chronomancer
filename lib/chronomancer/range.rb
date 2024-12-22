@@ -4,19 +4,13 @@ module Chronomancer
   class Range
     include Enumerable
 
-    DEFAULT_OPTIONS = {
-      interval_type: :months,
-      interval_value: 1,
-    }.freeze
-
-    attr_reader :first, :last, :options
-
+    attr_reader :first, :last, :interval
     attr_accessor :exceptions
 
-    def initialize(first, last = nil, options = Hash.new { |_, k| DEFAULT_OPTIONS[k] })
-      @first = first
-      @last = last
-      @options = options
+    def initialize(first, last = nil, interval = 1.month)
+      @first = first&.to_time
+      @last = last&.to_time
+      @interval = interval
     end
 
     def with_exceptions(ranges)
@@ -40,6 +34,21 @@ module Chronomancer
       end
     end
 
+    def next_occurrence(from = Time.current)
+      from = from.to_time
+
+      return if from >= last
+      return first if from < first
+
+      diff = from - first
+      intervals_passed = (diff / interval).ceil
+      result = first + (intervals_passed * interval)
+
+      return result if result <= last
+
+      nil
+    end
+
     def cover?(value)
       value >= first && value <= last
     end
@@ -53,7 +62,13 @@ module Chronomancer
     private
 
     def advance(time)
-      time.advance(interval_type => interval_value)
+      time.advance(split_duration(interval))
+    end
+
+    def split_duration(duration)
+      [:years, :months, :weeks, :days, :hours, :minutes, :seconds].each_with_object({}) do |unit, parts|
+        parts[unit] = duration.parts[unit] if duration.parts[unit]
+      end
     end
   end
 end

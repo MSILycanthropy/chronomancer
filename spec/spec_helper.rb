@@ -1,6 +1,9 @@
 # frozen_string_literal: true
 
 require "chronomancer"
+require "active_support"
+require "active_support/all"
+require "active_support/testing/time_helpers"
 
 RSpec.configure do |config|
   # Enable flags like --only-failures and --next-failure
