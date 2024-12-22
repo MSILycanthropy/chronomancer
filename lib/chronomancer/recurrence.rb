@@ -30,10 +30,10 @@ module Chronomancer
 
       n = [n, occurrences].min
 
-      ((occurrences - n)...occurrences).map { |i| nth(i) }
+      ((occurrences - n)...occurrences).map { |i| self[i] }
     end
 
-    def nth(n)
+    def [](n)
       raise ArgumentError, "negative array size" if n.negative?
 
       return if finite? && n > occurrences
@@ -53,7 +53,7 @@ module Chronomancer
     def each
       return enum_for(:each) unless block_given?
 
-      (0...occurrences).each { |n| yield nth(n) }
+      (0...occurrences).each { |n| yield self[n] }
     end
 
     def to_a
@@ -70,7 +70,7 @@ module Chronomancer
 
       diff = from - first
       intervals_passed = (diff / interval).ceil
-      result = nth(intervals_passed)
+      result = self[intervals_passed]
 
       return result + interval if from == result
       return result if infinite? || result <= last
@@ -98,7 +98,7 @@ module Chronomancer
 
       return false if finite? && intervals > occurrences
 
-      value == nth(intervals) && !excluded?(value)
+      value == self[intervals] && !excluded?(value)
     end
 
     def excluded?(value)

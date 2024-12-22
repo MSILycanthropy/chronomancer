@@ -9,8 +9,33 @@ RSpec.describe(Chronomancer::Recurrence) do
     described_class.new(first, ocurrences)
   end
 
+  around do |example|
+    travel_to(date) do
+      example.call
+    end
+  end
+
   let(:first) { Time.current.beginning_of_year }
   let(:ocurrences) { 12 }
+  let(:date) { "Jan 1st, 2024".to_time }
+
+  describe "leap year bullshit" do
+    let(:date) { "Jan 31st, 2024".to_time }
+    let(:first) { date }
+    let(:leap_day) { "Feb 29th, 2024".to_time }
+
+    it "doesnt skip leap days with nth" do
+      expect(range[1]).to(eq(leap_day))
+    end
+
+    it "doesnt skip leap days with to_a" do
+      expect(range.to_a).to(include(leap_day))
+    end
+
+    it "doesnt skip leap dates with next_occurence" do
+      expect(range.next_occurrence(date)).to(eq(leap_day))
+    end
+  end
 
   describe "#first" do
     it "returns the first element when n = 1" do
@@ -27,14 +52,12 @@ RSpec.describe(Chronomancer::Recurrence) do
   end
 
   describe "#nth" do
-    let(:n) { 7 }
-
     it "returns the nth element" do
-      expect(range.nth(7)).to(eq(first + 7.months))
+      expect(range[7]).to(eq(first + 7.months))
     end
 
     it "raises when n is negative" do
-      expect { range.nth(-1) }.to(raise_error(ArgumentError))
+      expect { range[-1] }.to(raise_error(ArgumentError))
     end
   end
 
@@ -103,9 +126,7 @@ RSpec.describe(Chronomancer::Recurrence) do
 
     describe "#next_occurrence" do
       it "returns the next occurrence from Time.current" do
-        travel_to "Jan 3rd, 2025".to_time do
-          expect(range.next_occurrence).to(eq("Feb 1st, 2025".to_time))
-        end
+        expect(range.next_occurrence).to(eq("Feb 1st, 2024".to_time))
       end
 
       it "returns the next occurrence from a given date" do
@@ -173,9 +194,7 @@ RSpec.describe(Chronomancer::Recurrence) do
 
     describe "#next_occurrence" do
       it "returns the next occurrence from Time.current" do
-        travel_to "Jan 3rd, 2025".to_time do
-          expect(range.next_occurrence).to(eq("Feb 1st, 2025".to_time))
-        end
+        expect(range.next_occurrence).to(eq("Feb 1st, 2024".to_time))
       end
 
       it "returns the next occurrence from a given date in the sequence" do
