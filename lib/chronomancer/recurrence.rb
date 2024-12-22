@@ -1,24 +1,17 @@
 # frozen_string_literal: true
 
 module Chronomancer
-  class Range
+  class Recurrence
     include Enumerable
 
     attr_reader :occurrences, :interval
     attr_accessor :exceptions
 
-    def initialize(start, end_or_occurrences = nil, interval = 1.month)
+    def initialize(start, occurrences = nil, interval = 1.month)
       @start = start&.to_time
       @interval = interval
 
-      @occurrences = case end_or_occurrences
-      when Integer
-        end_or_occurrences
-      when Time, Date
-        diff = end_or_occurrences.to_time - @start
-
-        @occurrences = (diff / interval).ceil
-      end
+      @occurrences = occurrences
     end
 
     def first(n = 1)
@@ -43,13 +36,9 @@ module Chronomancer
     def nth(n)
       raise ArgumentError, "negative array size" if n.negative?
 
-      return if n > occurrences
+      return if finite? && n > occurrences
 
-      current = first
-
-      n.times { current = advance(current) }
-
-      current
+      first + n * interval
     end
 
     def with_exceptions(ranges)
@@ -64,21 +53,7 @@ module Chronomancer
     def each
       return enum_for(:each) unless block_given?
 
-      current = first
-
-      if infinite?
-        loop do
-          yield current unless excluded?(current)
-
-          current = advance(current)
-        end
-      else
-        while current <= last
-          yield current unless excluded?(current)
-
-          current = advance(current)
-        end
-      end
+      (0...occurrences).each { |n| yield nth(n) }
     end
 
     def to_a
@@ -95,8 +70,9 @@ module Chronomancer
 
       diff = from - first
       intervals_passed = (diff / interval).ceil
-      result = first + (intervals_passed * interval)
+      result = nth(intervals_passed)
 
+      return result + interval if from == result
       return result if infinite? || result <= last
 
       nil
@@ -111,31 +87,24 @@ module Chronomancer
     end
 
     def include?(value)
-      cover?(value) && !excluded?(value)
-    end
+      return false unless value.respond_to?(:to_time)
 
-    def cover?(value)
-      end_check = infinite? || value <= last
+      value = value.to_time
 
-      value >= first && end_check
+      return false if value < first
+
+      diff = value - first
+      intervals = (diff / interval).ceil
+
+      return false if finite? && intervals > occurrences
+
+      value == nth(intervals) && !excluded?(value)
     end
 
     def excluded?(value)
       return false if exceptions.blank?
 
-      exceptions.any? { |e| e.cover?(value) }
-    end
-
-    private
-
-    def advance(time)
-      time.advance(split_duration(interval))
-    end
-
-    def split_duration(duration)
-      [:years, :months, :weeks, :days, :hours, :minutes, :seconds].each_with_object({}) do |unit, parts|
-        parts[unit] = duration.parts[unit] if duration.parts[unit]
-      end
+      exceptions.any? { |e| e.include?(value) }
     end
   end
 end

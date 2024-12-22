@@ -2,7 +2,7 @@
 
 require_relative "chronomancer/version"
 
-require "chronomancer/range"
+require "chronomancer/recurrence"
 
 module Chronomancer
   class Error < StandardError; end
