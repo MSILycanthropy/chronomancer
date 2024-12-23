@@ -19,6 +19,10 @@ RSpec.describe(Chronomancer::Recurrence::Builder) do
     expect { builder.build }.to(raise_error(Chronomancer::Error))
   end
 
+  it "cant call the same method twice" do
+    expect { builder.monthly.monthly }.to(raise_error(Chronomancer::Error))
+  end
+
   it "conflicts on interval methods" do
     expect { builder.daily.weekly }.to(raise_error(Chronomancer::Error))
   end

@@ -1,5 +1,12 @@
 # frozen_string_literal: true
 
+require "simplecov"
+SimpleCov.start do
+  add_filter "/spec/"
+  track_files "lib/**/*.rb"
+  add_filter "lib/chronomancer/version.rb"
+end
+
 require "chronomancer"
 require "active_support"
 require "active_support/all"

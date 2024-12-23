@@ -71,19 +71,23 @@ RSpec.describe(Chronomancer::Recurrence) do
     end
 
     describe "#include?" do
-      let(:exceptions) { [described_class.new(first + 10.days)] }
+      let(:exceptions) { [described_class.new(first + 1.month)] }
 
       it "returns true for dates in the range" do
         expect(range.include?("March 1st, 4444".to_time)).to(be(true))
       end
 
+      it "returns false for dates misaligned with the range" do
+        expect(range.include?("March 19st, 2024".to_time)).to(be(false))
+      end
+
       it "returns false for dates outside range" do
-        expect(range.include?("March 19th, 1999".to_time)).to(be(false))
+        expect(range.include?("March 1st, 1999".to_time)).to(be(false))
       end
 
       it "returns false for dates that are exceptions" do
         range.with_exceptions(exceptions) do |r|
-          expect(r.include?("March 19th, 4444".to_time)).to(be(false))
+          expect(r.include?("March 1st, 4444".to_time)).to(be(false))
         end
       end
     end
