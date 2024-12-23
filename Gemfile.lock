@@ -76,8 +76,6 @@ GEM
       rubocop (~> 1.61)
     rubocop-shopify (2.15.1)
       rubocop (~> 1.51)
-    rubocop-thread_safety (0.6.0)
-      rubocop (>= 1.48.1)
     ruby-progressbar (1.13.0)
     securerandom (0.4.1)
     tzinfo (2.0.6)
@@ -100,7 +98,6 @@ DEPENDENCIES
   rubocop-rake
   rubocop-rspec
   rubocop-shopify
-  rubocop-thread_safety
 
 BUNDLED WITH
    2.5.23
