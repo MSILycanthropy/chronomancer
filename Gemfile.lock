@@ -105,7 +105,7 @@ DEPENDENCIES
   rubocop-rake
   rubocop-rspec
   rubocop-shopify
-  simplecov (~> 0.22.0)
+  simplecov
 
 BUNDLED WITH
    2.5.23

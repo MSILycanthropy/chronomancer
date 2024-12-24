@@ -1,0 +1,41 @@
+module Chronomancer
+  class Recurrence
+    include Enumerable[Time]
+
+    @start: Time?
+    @interval: Numeric
+    @occurrences: Integer?
+    @exceptions: Array[Range[Time]]?
+
+    attr_reader occurrences: Integer?
+    attr_reader interval: Numeric
+    attr_accessor exceptions: Array[Range[Time]]?
+
+    def initialize: (Time? start, ?Integer? occurrences, ?Numeric interval) -> void
+
+    def first: () -> (Time)
+            | (Integer n) -> (Array[Time])
+
+    def last: () -> (Time | nil)
+            | (Integer n) -> (Array[Time] | nil)
+
+    def []: (Integer n) -> Time?
+
+    def with_exceptions: (Array[Range[Time]] ranges) { (Recurrence) -> void } -> void
+
+    def each: () { (Time) -> void } -> void
+            | () -> Enumerator[Time, Array[Time]]
+
+    def to_a: () -> Array[Time]
+
+    def next_occurrence: (?Time from) -> Time?
+
+    def infinite?: () -> bool
+
+    def finite?: () -> bool
+
+    def include?: (untyped value) -> bool
+
+    def excluded?: (Time value) -> bool
+  end
+end

@@ -1,0 +1,28 @@
+module Chronomancer
+  class Recurrence
+    class Builder
+      @start: Time
+      @interval: Numeric
+      @occurrences: Integer?
+      @end: Time?
+
+      def starting: (Time time) -> self
+
+      def daily: () -> self
+      def weekly: () -> self
+      def monthly: () -> self
+      def yearly: () -> self
+      def every: (Numeric duration) -> self
+
+      def total: (Integer count) -> self
+      def forever: () -> self
+      def until: (Time end_time) -> self
+
+      def build: () -> Recurrence
+
+      private
+
+      def calculate_occurrences_from_end_date: () -> void
+    end
+  end
+end

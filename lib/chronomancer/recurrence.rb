@@ -72,6 +72,7 @@ module Chronomancer
       intervals_passed = (diff / interval).ceil
       result = self[intervals_passed]
 
+      return if result.nil?
       return result + interval if from == result
       return result if infinite? || result <= last
 
@@ -102,7 +103,7 @@ module Chronomancer
     end
 
     def excluded?(value)
-      return false if exceptions.blank?
+      return false if exceptions.nil? || exceptions.empty?
 
       exceptions.any? { |e| e.include?(value) }
     end
