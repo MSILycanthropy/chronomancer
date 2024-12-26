@@ -4,8 +4,7 @@ module Chronomancer
   class Recurrence
     include Enumerable
 
-    attr_reader :occurrences, :interval
-    attr_accessor :exceptions
+    attr_accessor :occurrences, :interval, :exceptions
 
     def initialize(start, occurrences = nil, interval = 1.month)
       @start = start&.to_time
