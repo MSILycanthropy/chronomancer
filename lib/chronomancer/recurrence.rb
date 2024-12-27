@@ -14,9 +14,10 @@ module Chronomancer
     end
 
     def first(n = 1)
+      return [] if n.zero?
       return @start if n == 1
 
-      take(n)
+      (0..).lazy.map { |i| self[i] }.take(n).to_a
     end
 
     def last(n = 1)
@@ -25,11 +26,9 @@ module Chronomancer
       raise ArgumentError, "negative array size" if n.negative?
 
       return [] if n.zero?
-      return @start + (interval * (occurrences - 1)) if n == 1
+      return self[occurrences - 1] if n == 1
 
-      n = [n, occurrences].min
-
-      ((occurrences - n)...occurrences).map { |i| self[i] }
+      (occurrences - 1).downto(0).lazy.map { |i| self[i] }.take(n).to_a.reverse
     end
 
     def [](n)
@@ -37,7 +36,11 @@ module Chronomancer
 
       return if finite? && n > occurrences
 
-      first + n * interval
+      result = first + n * interval
+
+      return if exception?(result)
+
+      result
     end
 
     def with_exceptions(ranges)
@@ -49,10 +52,14 @@ module Chronomancer
       self.exceptions = previous
     end
 
-    def each
+    def each(&block)
       return enum_for(:each) unless block_given?
 
-      (0...occurrences).each { |n| yield self[n] }
+      enum = (0..).lazy
+        .map { |n| self[n] }
+        .filter_map(&:itself)
+
+      (infinite? ? enum : enum.take(occurrences)).each(&block)
     end
 
     def to_a
@@ -67,12 +74,14 @@ module Chronomancer
       return if finite? && from >= last
       return first if from < first
 
-      diff = from - first
-      intervals_passed = (diff / interval).ceil
-      result = self[intervals_passed]
+      intervals = time_to_intervals(from)
+      result = self[intervals + 1]
 
       return if result.nil?
-      return result + interval if from == result
+
+      result += interval if from == result
+
+      return if exception?(result)
       return result if infinite? || result <= last
 
       nil
@@ -93,18 +102,31 @@ module Chronomancer
 
       return false if value < first
 
-      diff = value - first
-      intervals = (diff / interval).ceil
+      intervals = time_to_intervals(value)
 
       return false if finite? && intervals > occurrences
 
-      value == self[intervals] && !excluded?(value)
+      value == self[intervals]
     end
 
-    def excluded?(value)
+    def exception?(value)
       return false if exceptions.nil? || exceptions.empty?
 
       exceptions.any? { |e| e.include?(value) }
+    end
+
+    private
+
+    def time_to_intervals(time)
+      intervals = ((time - first) / interval).ceil
+
+      result = intervals
+
+      occurrence = first + (intervals * interval)
+
+      result -= 1 if occurrence > time
+
+      result
     end
   end
 end

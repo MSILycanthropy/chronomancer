@@ -38,6 +38,8 @@ RSpec.describe(Chronomancer::Recurrence) do
   end
 
   describe "#first" do
+    let(:exceptions) { [described_class.new(first + 6.months, 3, 1.day)] }
+
     it "returns the first element when n = 1" do
       expect(range.first).to(eq(first))
     end
@@ -49,9 +51,15 @@ RSpec.describe(Chronomancer::Recurrence) do
     it "yields the first n elements" do
       expect(range.first(5)).to(eq(Date::MONTHNAMES.compact.first(5).map { |n| n.to_date.to_time }))
     end
+
+    it "works with exceptions, albeit kinda weirdly" do
+      range.with_exceptions(exceptions) do |r|
+        expect(r.first(7).last).to(be_nil)
+      end
+    end
   end
 
-  describe "#nth" do
+  describe "#[]" do
     it "returns the nth element" do
       expect(range[7]).to(eq(first + 7.months))
     end
@@ -93,7 +101,7 @@ RSpec.describe(Chronomancer::Recurrence) do
     end
 
     describe "#with_exceptions" do
-      let(:exceptions) { [described_class.new(first + 10.days, first + 10.days + 1.month)] }
+      let(:exceptions) { [described_class.new(first + 20.days, 30, 1.day)] }
 
       it "sets exceptions within block" do
         range.with_exceptions(exceptions) do |r|
@@ -107,6 +115,12 @@ RSpec.describe(Chronomancer::Recurrence) do
         end
 
         expect(range.exceptions).to(be_nil)
+      end
+
+      it "cant access date within exception" do
+        range.with_exceptions(exceptions) do |r|
+          expect(r[1]).to(be_nil)
+        end
       end
     end
 
@@ -155,7 +169,7 @@ RSpec.describe(Chronomancer::Recurrence) do
     end
 
     describe "#include?" do
-      let(:exceptions) { [described_class.new(first + 10.days, 1, interval_type: :days)] }
+      let(:exceptions) { [described_class.new(first + 10.days, 1.day)] }
 
       it "returns true for dates in the range" do
         expect(range.include?(Time.new(Time.current.year, 3, 1))).to(be(true))
