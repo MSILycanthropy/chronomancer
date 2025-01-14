@@ -115,6 +115,21 @@ module Chronomancer
       exceptions.any? { |e| e.include?(value) }
     end
 
+    def totally_covered_from?(recurrence, from = nil)
+      return false if recurrence.interval > interval
+      return false if infinite? && recurrence.finite?
+
+      occurrence = from.nil? ? 0 : time_to_intervals(from) + 1
+
+      return (occurrence..ocurrences).all? { |i| recurrence.include?(self[i]) } if finite?
+
+      start = self[occurrence]
+
+      puts recurrence.include?(start)
+
+      recurrence.include?(start) && intervals_divide_evenly?(interval, recurrence.interval)
+    end
+
     private
 
     def time_to_intervals(time)
@@ -127,6 +142,47 @@ module Chronomancer
       result -= 1 if occurrence > time
 
       result
+    end
+
+    def intervals_divide_evenly?(i1, i2)
+      return true if i1 == i2
+      return intervals_divide_evenly?(i2, i1) if i2 > i1
+
+      i1_seconds = interval_to_variable_seconds(i1)
+      i2_seconds = interval_to_variable_seconds(i2)
+
+      i1_seconds.product(i2_seconds).all? { |arr| arr.first % arr.last == 0 }
+    end
+
+    CONSTANT_PARTS = [:days, :minutes, :seconds].freeze
+    def interval_to_variable_seconds(interval)
+      parts = interval.parts
+      constant_seconds = parts
+        .select { |unit, _| CONSTANT_PARTS.include?(unit) }
+        .sum { |unit, value| value.send(unit).in_seconds }
+
+      return [constant_seconds] unless parts.key?(:months) || parts.key?(:years)
+
+      possibilities = [constant_seconds]
+
+      possibilities = expand_month_possibilities(possibilities, parts) if parts.key?(:months)
+      possibilities = expand_year_possibilities(possibilities, parts) if parts.key?(:years)
+
+      possibilities.uniq.sort
+    end
+
+    def expand_month_possibilities(possibilities, parts)
+      [28, 29, 30, 31].flat_map do |days_in_month|
+        month_seconds = days_in_month.days.in_seconds * parts[:months]
+        possibilities.map { |base| base + month_seconds }
+      end
+    end
+
+    def expand_year_possibilities(possibilities, parts)
+      [365, 366].flat_map do |days_in_year|
+        year_seconds = days_in_year.days.in_seconds * parts[:years]
+        possibilities.map { |base| base + year_seconds }
+      end
     end
   end
 end
