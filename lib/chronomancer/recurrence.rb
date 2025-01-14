@@ -18,6 +18,10 @@ module Chronomancer
           super
         end
       end
+
+      def from_json(json)
+        new(json["start"], json["occurrences"], json["interval"])
+      end
     end
 
     attr_accessor :occurrences, :interval, :exceptions
@@ -27,6 +31,14 @@ module Chronomancer
       @interval = interval
 
       @occurrences = occurrences
+    end
+
+    def to_json(...)
+      { start: @start, occurrences: @occurrences, interval: @interval }.reject { |_, v| v.blank? }
+    end
+
+    def as_json(...)
+      { start: @start, occurrences: @occurrences, interval: @interval }.reject { |_, v| v.blank? }.as_json
     end
 
     def first(n = 1)

@@ -16,6 +16,29 @@ module Chronomancer
           super
         end
       end
+
+      def dump(obj)
+        return if obj.nil?
+        return dump(load(obj)) if obj.is_a?(String)
+
+        {
+          active: obj.active.as_json,
+          historical: obj.historical.map(&:as_json),
+          exceptions: obj.exceptions.map(&:as_json),
+        }.reject { |_, v| v.blank? }.to_json
+      end
+
+      def load(str)
+        return if str.blank?
+
+        json = JSON.parse(str)
+
+        instance = new(Recurrence.from_json(json["active"]))
+        instance.instance_variable_set(:@historical, json["historical"]&.map { |h| Recurrence.from_json(h) })
+        instance.instance_variable_set(:@exceptions, json["exceptions"]&.map { |e| Recurrence.from_json(e) })
+
+        instance
+      end
     end
 
     attr_reader :active, :historical, :exceptions
