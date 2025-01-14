@@ -6,8 +6,8 @@ require "chronomancer/builder"
 require "chronomancer/recurrence"
 require "chronomancer/recurrence/builder"
 require "chronomancer/sequence"
+require "chronomancer/sequence/builder"
 
 module Chronomancer
   class Error < StandardError; end
-  # Your code goes here...
 end

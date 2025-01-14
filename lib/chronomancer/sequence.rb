@@ -4,6 +4,20 @@ module Chronomancer
   class Sequence
     include Enumerable
 
+    class << self
+      def respond_to_missing?(method_name)
+        Builder.instance_methods.include?(method_name) || super
+      end
+
+      def method_missing(method_name, ...)
+        if Builder.instance_methods.include?(method_name)
+          Builder.new.send(method_name, ...)
+        else
+          super
+        end
+      end
+    end
+
     attr_reader :active, :historical, :exceptions
 
     def initialize(initial)

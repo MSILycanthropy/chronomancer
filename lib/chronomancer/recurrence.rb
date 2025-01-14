@@ -4,6 +4,22 @@ module Chronomancer
   class Recurrence
     include Enumerable
 
+    class << self
+      # :nocov:
+      def respond_to_missing?(method_name)
+        Builder.instance_methods.include?(method_name) || super
+      end
+      # :nocov:
+
+      def method_missing(method_name, ...)
+        if Builder.instance_methods.include?(method_name)
+          Builder.new.send(method_name, ...)
+        else
+          super
+        end
+      end
+    end
+
     attr_accessor :occurrences, :interval, :exceptions
 
     def initialize(start, occurrences = nil, interval = 1.month)
