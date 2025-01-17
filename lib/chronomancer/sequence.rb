@@ -70,13 +70,15 @@ module Chronomancer
         raise Chronomancer::Error, "reconfiguring around #{stop} would break the sequence, a sequence must " \
           "have non-overlapping recurrences" if stop <= active.first
         raise Chronomancer::Error, "stop must be between #{active.first} and #{active.last}, try specifying " \
-          "a restart date if you would like to skip occurrences" if stop >= active.last
+          "a restart date if you would like to skip occurrences" if active.finite? && stop >= active.last
 
         restart ||= stop
-        current_occurrence = current_active_occurrence
         around = ((stop - active.first) / active.interval).ceil unless stop.nil?
 
-        reconfigure_active(**changes) if around == current_occurrence
+        if around == current_active_occurrence
+          reconfigure_active(**changes)
+          return self
+        end
 
         interval = changes[:interval] || active.interval
         occurrences = if changes.key?(:occurrences)
