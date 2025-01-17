@@ -49,7 +49,7 @@ RSpec.describe(Chronomancer::Recurrence) do
     end
 
     it "yields the first n elements" do
-      expect(range.first(5)).to(eq(Date::MONTHNAMES.compact.first(5).map { |n| n.to_date.to_time }))
+      expect(range.first(5)).to(eq(Date::MONTHNAMES.compact.first(5).map { |n| n.to_date.to_time.change(year: 2024) }))
     end
 
     it "works with exceptions, albeit kinda weirdly" do
@@ -138,7 +138,7 @@ RSpec.describe(Chronomancer::Recurrence) do
       end
 
       it "iterates over dates" do
-        expect(dates).to(eq(Date::MONTHNAMES.compact.map { |n| n.to_date.to_time }))
+        expect(dates).to(eq(Date::MONTHNAMES.compact.map { |n| n.to_date.to_time.change(year: 2024) }))
       end
     end
 
@@ -164,7 +164,7 @@ RSpec.describe(Chronomancer::Recurrence) do
       end
 
       it "yields the last n elements" do
-        expect(range.last(5)).to(eq(Date::MONTHNAMES.compact.last(5).map { |n| n.to_date.to_time }))
+        expect(range.last(5)).to(eq(Date::MONTHNAMES.compact.last(5).map { |n| n.to_date.to_time.change(year: 2024) }))
       end
     end
 
@@ -206,7 +206,7 @@ RSpec.describe(Chronomancer::Recurrence) do
 
     describe "#each" do
       it "iterates over all dates" do
-        expect(range.to_a).to(eq(Date::MONTHNAMES.compact.map { |n| n.to_date.to_time }))
+        expect(range.to_a).to(eq(Date::MONTHNAMES.compact.map { |n| n.to_date.to_time.change(year: 2024) }))
       end
     end
 

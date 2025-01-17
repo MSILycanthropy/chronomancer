@@ -149,5 +149,15 @@ module Chronomancer
 
       exceptions.any? { |e| e.include?(value) }
     end
+
+    private 
+
+    def time_to_intervals(time)
+      intervals = ((time - first) / interval).ceil
+      result = intervals
+      occurrence = first + (intervals * interval)
+      result -= 1 if occurrence > time
+      result
+    end
   end
 end

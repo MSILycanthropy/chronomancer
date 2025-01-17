@@ -67,13 +67,19 @@ module Chronomancer
     private
 
     # :nocov:
-    def respond_to_missing?(method)
+    def respond_to_missing?(...)
       true
     end
     # :nocov:
 
     def method_missing(method, ...)
-      build.send(method, ...)
+      built = build
+
+      if built.respond_to?(method)
+        build.send(method, ...)
+      else
+        super
+      end
     end
   end
 end
